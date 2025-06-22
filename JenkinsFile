@@ -22,7 +22,14 @@ pipeline {
                 failure { echo '======== Checkout execution failed ========' }
             }
         }
-
+        stage('Inject'){
+            steps{
+                sh '''
+                    touch .env
+                    echo "PORT=3000" >> .env
+                    '''
+            }
+        }
         /* ────────── 2. BUILD IMAGE ────────── */
         stage('Build') {
             steps {
