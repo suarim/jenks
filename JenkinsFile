@@ -33,6 +33,20 @@ pipeline {
                 failure { echo '======== Build Stage execution failed ========' }
             }
         }
+        stage('Push'){
+            steps{
+                withCredentials([usernamePassword(credentialId:'docker_pass', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    echo '======== executing Push Stage ========'
+                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    sh "docker push ${IMAGE}:${TAG}"
+                }
+            }
+            post {
+                always  { echo '======== Push Stage completed ========' }
+                success { echo '======== Push Stage executed successfully ========' }
+                failure { echo '======== Push Stage execution failed ========' }
+            }
+        }
         
       
     }
