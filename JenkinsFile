@@ -5,7 +5,7 @@ pipeline {
     environment {
         REGISTRY = 'suarim'                       // e.g. Docker Hub username
         IMAGE    = "${env.REGISTRY}/jenksdocks"   // full repo name
-        TAG      = "${env.BUILD_NUMBER}"          // Jenkins build number
+        TAG      = "v${env.BUILD_NUMBER}"          // Jenkins build number
     }
 
     stages {

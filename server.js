@@ -61,7 +61,7 @@ app.get('/', (req, res) => {
                 </p>
 
                 <button class="redirect-button" onclick="window.location.href='/new'">
-                    Go to New Page
+                    Go to New Page you wanker
                 </button>
 
             </div>
