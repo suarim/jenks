@@ -47,7 +47,14 @@ pipeline {
                 failure { echo '======== Push Stage execution failed ========' }
             }
         }
-        
+        stage('Deploy'){
+            steps{
+                withCredentials([file(credentialsId;'jenks', variable: 'ENV_FILE')]) {
+                echo '======== executing Deploy Stage ========'
+                sh 'docker rm run  --env-file ./ENV_FILE -d -p 10000:10000  ${IMAGE}:${TAG}'
+            }
+        }
+        }
       
     }
 
