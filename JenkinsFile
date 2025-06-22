@@ -22,8 +22,8 @@ pipeline {
                 failure { echo '======== Checkout execution failed ========' }
             }
         }
-        stage{
-            steps:{
+        stage('Build') {
+            steps {
                 echo '======== executing Build Stage ========'
                 sh 'docker build -t ${IMAGE}:${TAG} .'
             }
@@ -34,10 +34,10 @@ pipeline {
             }
         }
         
-        /* ─────── add Push / Deploy stages later ─────── */
+      
     }
 
-    /* Optional global cleanup */
+ 
     post {
         always {
             echo '🧹  Cleaning workspace'
