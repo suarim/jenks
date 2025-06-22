@@ -1,47 +1,54 @@
-pipeline{
+pipeline {
     agent any
-    environment{
-        REGISTRY  = 'suarim'
-    IMAGE     = "${env.REGISTRY}/jenksdocks"
-    TAG       = "${env.BUILD_NUMBER}"
+
+    /* ─────────── Global variables ─────────── */
+    environment {
+        REGISTRY = 'suarim'                       // e.g. Docker Hub username
+        IMAGE    = "${REGISTRY}/jenksdocks"       // full repo name
+        TAG      = "${BUILD_NUMBER}"              // Jenkins build number
     }
-    stages{
-        stage("Checkout"){
-            steps{
-                echo "========executing Checkout========"
+
+    stages {
+
+        /* ────────── 1. CHECKOUT ────────── */
+        stage('Checkout') {
+            steps {
+                echo '======== executing Checkout ========'
                 checkout scm
             }
-            post{
-                always{
-                    echo "========Checkout completed========"
-                }
-                success{
-                    echo "========Checkout executed successfully========"
-
-                }
-                failure{
-                    echo "========Checkout execution failed========"
-                }
+            post {
+                always  { echo '======== Checkout completed ========' }
+                success { echo '======== Checkout executed successfully ========' }
+                failure { echo '======== Checkout execution failed ========' }
             }
         }
-        stage("Build"){
-            steps{
-            withCredentials([file(credentialsId:'jenks', variable: 'DOTENV')]){
-            sh '''
-                docker build ${IMAGE}:${TAG}  .
+
+        /* ────────── 2. BUILD IMAGE ────────── */
+        stage('Build') {
+            steps {
+                /* Triple-single-quoted Groovy string → shell script.
+                   $IMAGE and $TAG expand inside the *shell*, not in Groovy. */
+                sh '''
+                    set -e               # fail fast on any error
+                    echo "Building image $IMAGE:$TAG"
+                    docker build -t $IMAGE:$TAG .
                 '''
             }
+            post {
+                always  { echo '======== Build completed ========' }
+                success { echo '======== Build executed successfully ========' }
+                failure { echo '======== Build execution failed ========' }
+            }
         }
-        post{
-            always{
-                echo "========Build completed========"
-            }
-            success{
-                echo "========Build executed successfully========"
-            }
-            failure{
-                echo "========Build execution failed========"
-            }
+
+        /* ─────── add Push / Deploy stages later ─────── */
+    }
+
+    /* Optional global cleanup */
+    post {
+        always {
+            echo '🧹  Cleaning workspace'
+            cleanWs()
         }
     }
-}}
+}
