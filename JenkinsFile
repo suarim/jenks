@@ -28,7 +28,7 @@ pipeline{
             steps{
             withCredentials([file(credentialsId:'jenks', variable: 'DOTENV')]){
             sh '''
-                docker build ${IMAGE}:${TAG} -f Dockerfile --build-arg DOTENV=$DOTENV .
+                docker build ${IMAGE}:${TAG}  .
                 '''
             }
         }
@@ -44,4 +44,4 @@ pipeline{
             }
         }
     }
-}}
+}}Add build stage and post-execution messages to Jenkins pipeline
