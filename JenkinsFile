@@ -43,7 +43,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'jenks', variable: 'ENV_FILE')]) {
                     sh """
                       docker rm -f ${CONTAINER} 2>/dev/null || true
-                      docker run -it --name ${CONTAINER} \
+                      docker run -d --name ${CONTAINER} \
                         --restart unless-stopped \
                         --env-file "${ENV_FILE}" \
                         -p 10000:11000 \
