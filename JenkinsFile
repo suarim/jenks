@@ -25,6 +25,7 @@ pipeline{
             }
         }
         stage("Build"){
+            steps{
             withCredentials([file(credentialsId:'jenks', variable: 'DOTENV')]){
             sh '''
                 docker build ${IMAGE}:${TAG} -f Dockerfile --build-arg DOTENV=$DOTENV .
@@ -43,4 +44,4 @@ pipeline{
             }
         }
     }
-}
+}}
