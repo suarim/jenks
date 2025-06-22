@@ -24,5 +24,23 @@ pipeline{
                 }
             }
         }
+        stage("Build"){
+            withCredentials([file(credentialsId:'jenks', variable: 'DOTENV')]){
+            sh '''
+                docker build ${IMAGE}:${TAG} -f Dockerfile --build-arg DOTENV=$DOTENV .
+                '''
+            }
+        }
+        post{
+            always{
+                echo "========Build completed========"
+            }
+            success{
+                echo "========Build executed successfully========"
+            }
+            failure{
+                echo "========Build execution failed========"
+            }
+        }
     }
 }
