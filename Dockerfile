@@ -1,16 +1,22 @@
-FROM node:20 as builder
-WORKDIR /app
-COPY package*.json ./
+FROM node:20 AS builder
 
-RUN npm install
-RUN npm install nodemon
-COPY . .
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --production
+
+COPY server.js ./
+
 
 FROM node:20-alpine
-WORKDIR /app
-COPY --from=builder /app/package*.json ./
 
-RUN npm install
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/server.js ./server.js
-COPY --from=builder /app/.env ./.env
-CMD ["node","server.js"]
+
+ENV PORT=11000
+
+EXPOSE 11000
+
+CMD ["node", "server.js"]

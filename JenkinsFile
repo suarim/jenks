@@ -22,32 +22,18 @@ pipeline {
                 failure { echo '======== Checkout execution failed ========' }
             }
         }
-        stage('Inject'){
-            steps{
-                sh '''
-                    touch .env
-                    echo "PORT=3000" >> .env
-                    '''
-            }
-        }
-        /* ────────── 2. BUILD IMAGE ────────── */
-        stage('Build') {
-            steps {
-                /* Triple-single-quoted Groovy string → shell script.
-                   $IMAGE and $TAG expand inside the *shell*, not in Groovy. */
-                sh '''
-                    set -e               # fail fast on any error
-                    echo "Building image $IMAGE:$TAG"
-                    docker build -t $IMAGE:$TAG .
-                '''
+        stage{
+            steps:{
+                echo '======== executing Build Stage ========'
+                sh 'docker build -t ${IMAGE}:${TAG} .'
             }
             post {
-                always  { echo '======== Build completed ========' }
-                success { echo '======== Build executed successfully ========' }
-                failure { echo '======== Build execution failed ========' }
+                always  { echo '======== Build Stage completed ========' }
+                success { echo '======== Build Stage executed successfully ========' }
+                failure { echo '======== Build Stage execution failed ========' }
             }
         }
-
+        
         /* ─────── add Push / Deploy stages later ─────── */
     }
 
