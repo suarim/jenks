@@ -4,8 +4,8 @@ pipeline {
     /* ─────────── Global variables ─────────── */
     environment {
         REGISTRY = 'suarim'                       // e.g. Docker Hub username
-        IMAGE    = "${REGISTRY}/jenksdocks"       // full repo name
-        TAG      = "${BUILD_NUMBER}"              // Jenkins build number
+        IMAGE    = "${env.REGISTRY}/jenksdocks"   // full repo name
+        TAG      = "${env.BUILD_NUMBER}"          // Jenkins build number
     }
 
     stages {
@@ -35,7 +35,7 @@ pipeline {
         }
         stage('Push'){
             steps{
-                withCredentials([usernamePassword(credentialId:'docker_pass', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId:'docker_pass', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     echo '======== executing Push Stage ========'
                     sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     sh "docker push ${IMAGE}:${TAG}"
