@@ -1,68 +1,60 @@
 pipeline {
     agent any
 
-    /* ─────────── Global variables ─────────── */
     environment {
-        REGISTRY = 'suarim'                       // e.g. Docker Hub username
-        IMAGE    = "${env.REGISTRY}/jenksdocks"   // full repo name
-        TAG      = "v${env.BUILD_NUMBER}"          // Jenkins build number
+        REGISTRY  = 'suarim'
+        IMAGE     = "${REGISTRY}/jenksdocks"
+        TAG       = "v${BUILD_NUMBER}"
+        CONTAINER = 'jenksdocks-app'
     }
 
     stages {
-
-        /* ────────── 1. CHECKOUT ────────── */
         stage('Checkout') {
-            steps {
-                echo '======== executing Checkout ========'
-                checkout scm
-            }
-            post {
-                always  { echo '======== Checkout completed ========' }
-                success { echo '======== Checkout executed successfully ========' }
-                failure { echo '======== Checkout execution failed ========' }
-            }
+            steps { checkout scm }
         }
+
         stage('Build') {
             steps {
-                echo '======== executing Build Stage ========'
-                sh 'docker build -t ${IMAGE}:${TAG} .'
-            }
-            post {
-                always  { echo '======== Build Stage completed ========' }
-                success { echo '======== Build Stage executed successfully ========' }
-                failure { echo '======== Build Stage execution failed ========' }
+                sh """
+                  docker build -t ${IMAGE}:${TAG} .
+                """
             }
         }
-        stage('Push'){
-            steps{
-                withCredentials([usernamePassword(credentialsId:'docker_pass', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    echo '======== executing Push Stage ========'
-                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                    sh "docker push ${IMAGE}:${TAG}"
+
+        stage('Push') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'docker_pass',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    sh """
+                      echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+                      docker push ${IMAGE}:${TAG}
+                    """
                 }
             }
-            post {
-                always  { echo '======== Push Stage completed ========' }
-                success { echo '======== Push Stage executed successfully ========' }
-                failure { echo '======== Push Stage execution failed ========' }
+        }
+
+        stage('Deploy') {
+            steps {
+                withCredentials([file(credentialsId: 'jenks', variable: 'ENV_FILE')]) {
+                    sh """
+                      docker rm -f ${CONTAINER} 2>/dev/null || true
+                      docker run -d --name ${CONTAINER} \
+                        --restart unless-stopped \
+                        --env-file "${ENV_FILE}" \
+                        -p 10000:11000 \
+                        ${IMAGE}:${TAG}
+                    """
+                }
             }
         }
-        stage('Deploy'){
-            steps{
-                withCredentials([file(credentialsId:'jenks', variable: 'ENV_FILE')]) {
-                echo '======== executing Deploy Stage ========'
-                sh 'docker rm run  --env-file ./ENV_FILE -d -p 10000:10000  ${IMAGE}:${TAG}'
-            }
-        }
-        }
-      
     }
 
- 
     post {
-        always {
-            echo '🧹  Cleaning workspace'
-            cleanWs()
-        }
+        always { cleanWs() }
     }
 }
