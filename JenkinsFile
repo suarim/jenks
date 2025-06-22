@@ -44,4 +44,4 @@ pipeline{
             }
         }
     }
-}}Add build stage and post-execution messages to Jenkins pipeline
+}}
